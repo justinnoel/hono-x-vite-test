@@ -1,16 +1,21 @@
-import { defineConfig } from "vite";
-import { getPlatformProxy } from "wrangler";
-import honox from "honox/vite";
-import clientBuild from "honox/vite/client";
-import pagesBuild from "@hono/vite-cloudflare-pages";
+import { defineConfig } from 'vite'
+import { getPlatformProxy } from 'wrangler'
+import honox from 'honox/vite'
+import clientBuild from 'honox/vite/client'
+import pagesBuild from '@hono/vite-cloudflare-pages'
 
-export default defineConfig(async ({ mode }) => {
-  const { env, dispose } = await getPlatformProxy();
-  if (mode === "client") {
+export default defineConfig(async ({ mode, command }) => {
+  if (mode === 'client') {
     return {
-      plugins: [clientBuild()],
-    };
+      plugins: [clientBuild()]
+    }
   }
+  if (command === 'build') {
+    return {
+      plugins: [honox(), pagesBuild()]
+    }
+  }
+  const { env, dispose } = await getPlatformProxy()
   return {
     plugins: [
       honox({
@@ -18,12 +23,12 @@ export default defineConfig(async ({ mode }) => {
           env,
           plugins: [
             {
-              onServerClose: dispose,
-            },
-          ],
-        },
+              onServerClose: dispose
+            }
+          ]
+        }
       }),
-      pagesBuild(),
-    ],
-  };
-});
+      pagesBuild()
+    ]
+  }
+})
